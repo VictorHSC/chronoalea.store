@@ -17,6 +17,10 @@ pnpm-debug.log*
 .env
 .env.production
 
+# original camera files (RAW/DNG) — keep local; the developed JPEGs in
+# src/assets/items/ are the committed source of truth
+raw/
+
 # macOS-specific files
 .DS_Store
 

@@ -10,6 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "new-item": "node scripts/new-item.mjs",
+    "import-raw": "node scripts/import-raw.mjs",
     "astro": "astro"
   },
   "dependencies": {

@@ -1,12 +1,15 @@
 ---
+import { Image } from 'astro:assets';
 import type { Item } from '../lib/items';
 import { itemUrl, cover, slugify } from '../lib/items';
+import { getPhotos } from '../lib/images';
 import StatusBadge from './StatusBadge.astro';
 
 interface Props {
   item: Item;
 }
 const { item } = Astro.props;
+const optimized = getPhotos(item.id)[0]; // imagem otimizada, se houver
 const photo = cover(item);
 // slugs das tags, para o filtro client-side da home.
 const tagSlugs = item.data.tags.map(slugify).join(' ');
@@ -20,9 +23,11 @@ const tagSlugs = item.data.tags.map(slugify).join(' ');
 >
   <div class="thumb">
     {item.data.status !== 'available' && <StatusBadge status={item.data.status} />}
-    {photo
-      ? <img src={photo} alt={item.data.title} loading="lazy" decoding="async" />
-      : <span class="placeholder">🃏</span>}
+    {optimized
+      ? <Image src={optimized} alt={item.data.title} widths={[220, 440]} sizes="(min-width: 640px) 200px, 45vw" loading="lazy" />
+      : photo
+        ? <img src={photo} alt={item.data.title} loading="lazy" decoding="async" />
+        : <span class="placeholder">🃏</span>}
   </div>
   <div class="body">
     <div class="title">{item.data.title}</div>

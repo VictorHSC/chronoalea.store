@@ -18,10 +18,14 @@ is a pre-rendered static site with per-page Open Graph tags.
 - **Content Collections** (Content Layer API, `glob` loader) — items & groups are
   Markdown files validated by a Zod schema in `src/content.config.ts`.
 - **Plain mobile-first CSS** with variables + dark mode — `src/styles/global.css`.
-- **Photos live in `public/`** (not `src/assets`) and are referenced by absolute
-  path (e.g. `/items/black-lotus/1.jpg`). Chosen for dead-simple manual editing
-  and reliable absolute OG image URLs. Trade-off: no build-time optimization, so
-  keep photos ≲1600px. The first photo is the WhatsApp preview image.
+- **Item photos:** real photos live in **`src/assets/items/<slug>/`** and Astro
+  optimizes them into responsive AVIF/WebP (small first, full-res on demand). The
+  item page + card auto-read every image in that folder, sorted by filename (first
+  = WhatsApp preview); no `photos` frontmatter needed. RAW/DNG/HEIC are developed
+  with `npm run import-raw`. `src/lib/images.ts` resolves the optimized set and the
+  components fall back to the legacy `photos` paths when none exist. The two demo
+  items use that **legacy** path: a raster in `public/items/<slug>/` listed under
+  `photos` (no optimization).
 - **Language:** Brazilian Portuguese (UI strings centralized in `src/config.ts`).
 - **Contact:** WhatsApp only — a pre-filled `wa.me` link including the item title
   and its canonical URL.
@@ -34,6 +38,7 @@ npm run dev        # dev server at localhost:4321
 npm run build      # static build to dist/
 npm run preview    # serve the build locally
 npm run new-item -- "Nome do Item" grupo   # scaffold a new item (see below)
+npm run import-raw -- <slug> foto.DNG ...  # develop RAW/DNG/HEIC into src/assets
 ```
 Astro also supports `astro dev --background` (manage with `astro dev stop|status|logs`).
 
@@ -43,6 +48,8 @@ src/
   config.ts            # SITE settings (name, domain, whatsapp, hideSold) + STR (UI text)
   content.config.ts    # Zod schema for items + groups (the source of truth for fields)
   lib/items.ts         # helpers: getAllItems, getAllGroups, collectTags, slugify, *Url
+  lib/images.ts        # resolves optimized photos from src/assets/items/<slug>/
+  assets/items/<slug>/* # developed photos, optimized by Astro (responsive AVIF/WebP)
   layouts/Base.astro   # HTML shell + <head> Open Graph/canonical meta
   components/           # ItemCard, Gallery, WhatsAppButton, StatusBadge
   pages/
@@ -55,19 +62,21 @@ src/
     items/<slug>.md    # one file per item (filename = URL slug)
     groups/<slug>.md   # curated groups (filename = the `group` value items reference)
 public/
-  items/<slug>/*       # photos, referenced by absolute path in item frontmatter
+  items/<slug>/*       # legacy photos (demo items, via `photos` frontmatter)
   CNAME                # store.chronoalea.com (custom domain)
   og-default.svg       # fallback preview image
 .github/workflows/deploy.yml   # build + deploy to GitHub Pages on push to main
 scripts/new-item.mjs           # the `npm run new-item` scaffolder
+scripts/import-raw.mjs         # develop RAW/DNG/HEIC into src/assets (npm run import-raw)
 ```
 
 ## Content model
 **Item** frontmatter (schema in `src/content.config.ts`):
 `title` (req), `group` (slug of a file in `content/groups/`), `tags` (string[]),
-`status` (`available`|`reserved`|`sold`), `condition` (free text), `photos`
-(absolute paths under `/`), `featured` (bool, pins to top), `date` (sort key,
-newest first). The Markdown **body** is the description.
+`status` (`available`|`reserved`|`sold`), `condition` (free text), `featured`
+(bool, pins to top), `date` (sort key, newest first). The Markdown **body** is the
+description. **Photos:** new items use `src/assets/items/<slug>/` (auto-detected +
+optimized); `photos` (absolute `/public` paths) stays optional for legacy items.
 
 **Group** frontmatter: `title`, `description?`, `cover?`, `order` (sort).
 
@@ -80,8 +89,10 @@ in `src/lib/items.ts` (strips accents → kebab-case).
 ## Adding an item
 Use the **`/add-item` skill** (`.claude/skills/add-item/`) or do it by hand:
 1. `npm run new-item -- "Título" grupo` → creates `src/content/items/<slug>.md`
-   and `public/items/<slug>/`.
-2. Put **real `.jpg`/`.png`** photos in that folder (first = preview). Not SVG.
+   and `src/assets/items/<slug>/`.
+2. Add photos to that folder, named in order (`01-…`, `02-…`; first = preview).
+   RAW/DNG/HEIC: `npm run import-raw -- <slug> file1.DNG …`. No `photos:` field
+   needed — Astro optimizes and the page auto-reads the folder.
 3. Edit the frontmatter (tags, condition, status) and the body (description).
 4. Commit & push to `main` → GitHub Actions rebuilds & redeploys (~1 min).
 

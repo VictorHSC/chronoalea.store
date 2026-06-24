@@ -1,11 +1,13 @@
 ---
 import { getCollection, getEntry, render } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import Gallery from '../../components/Gallery.astro';
 import WhatsAppButton from '../../components/WhatsAppButton.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
 import { STR } from '../../config';
 import { slugify, tagUrl, groupUrl, cover } from '../../lib/items';
+import { getPhotos } from '../../lib/images';
 
 export async function getStaticPaths() {
   const items = await getCollection('items');
@@ -14,6 +16,14 @@ export async function getStaticPaths() {
 
 const { item } = Astro.props;
 const { Content } = await render(item);
+
+// Fotos otimizadas (src/assets); itens antigos caem no campo `photos`.
+const photos = getPhotos(item.id);
+// og:image precisa ser JPEG absoluto p/ o WhatsApp; gera uma versão 1200px.
+let ogImage = cover(item);
+if (photos[0]) {
+  ogImage = (await getImage({ src: photos[0], format: 'jpeg', width: 1200 })).src;
+}
 
 const url = new URL(`/item/${item.id}/`, Astro.site).toString();
 const description = [item.data.title, item.data.condition, ...item.data.tags]
@@ -27,7 +37,7 @@ const groupEntry = item.data.group
 <Base
   title={item.data.title}
   description={description}
-  image={cover(item)}
+  image={ogImage}
   type="article"
 >
   <a class="back" href="/">{STR.backHome}</a>
@@ -37,7 +47,23 @@ const groupEntry = item.data.group
     <StatusBadge status={item.data.status} variant="static" />
   </div>
 
-  <Gallery photos={item.data.photos} alt={item.data.title} />
+  {photos.length > 0 ? (
+    <div class:list={['gallery', photos.length === 1 && 'single']}>
+      {photos.map((img, i) => (
+        <div class="shot">
+          <Image
+            src={img}
+            alt={`${item.data.title} (${i + 1}/${photos.length})`}
+            widths={[400, 800, 1200, 1600]}
+            sizes="(min-width: 640px) 520px, 86vw"
+            loading={i === 0 ? 'eager' : 'lazy'}
+          />
+        </div>
+      ))}
+    </div>
+  ) : (
+    <Gallery photos={item.data.photos} alt={item.data.title} />
+  )}
 
   {(item.data.condition || groupEntry) && (
     <div class="kv">

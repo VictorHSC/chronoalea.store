@@ -40,27 +40,36 @@ with a consistent slug:
 npm run new-item -- "Título do Item" grupo
 ```
 
-It writes `src/content/items/<slug>.md` and `public/items/<slug>/`. Read the
-command output to learn the exact `<slug>` it chose (slugified title).
+It writes `src/content/items/<slug>.md` and `src/assets/items/<slug>/` (the photo
+folder). Read the command output to learn the exact `<slug>` it chose.
 
-## 3. Place the photos
-Photos go in `public/items/<slug>/`, named `1.jpg`, `2.jpg`, … The **first photo
-is the WhatsApp/link preview image**, so make it the best/front shot.
+## 3. Add the photos (optimized pipeline)
+Photos for new items live in **`src/assets/items/<slug>/`** — Astro turns them
+into responsive AVIF/WebP at build time, so the page loads a tiny image first and
+full-res only when needed. Name them so they **sort in display order**; the first
+(e.g. `01-…`) is the **WhatsApp/link preview**, so make it the best/hero shot.
 
-- If the user gave file paths, copy them in: `cp "<src>" public/items/<slug>/1.jpg`.
-- **Must be raster** (`.jpg`/`.png`) — SVG won't preview in WhatsApp. If a source
-  is `.heic`/`.webp`/huge, convert/resize with macOS `sips`, e.g.
-  `sips -s format jpeg -Z 1600 "<src>" --out public/items/<slug>/1.jpg`
-  (`-Z 1600` caps the long edge at 1600px to keep loads fast — there's no
-  build-time image optimization).
-- If the user has no photos yet, leave the `photos:` entry as a placeholder and
-  tell them to drop files in that folder before publishing.
+- **RAW / DNG / HEIC** (e.g. iPhone ProRAW): run the importer, listing the files
+  in the order you want — it develops, resizes, and numbers them:
+  ```sh
+  npm run import-raw -- <slug> path/to/hero.DNG path/to/two.DNG ...
+  ```
+- **Already JPG/PNG:** copy them in, numbered:
+  `cp hero.jpg src/assets/items/<slug>/01-hero.jpg` (then `02-…`, `03-…`).
+- The site reads **every image in that folder automatically** (sorted by name) —
+  you do **not** list them in the frontmatter.
+- If there are no photos yet, leave the folder empty and tell the user to add
+  them before publishing.
+
+> Legacy/simple path (no optimization): you may instead drop a raster in
+> `public/items/<slug>/` and list it under `photos:` in the frontmatter. The two
+> demo items work this way. Prefer `src/assets` for real photos.
 
 ## 4. Fill the frontmatter
-Edit `src/content/items/<slug>.md`. The schema lives in
-`src/content.config.ts` — match it exactly. Update the `photos:` list to the
-real filenames, set `group`/`tags`/`condition`/`status`, and write the
-description in the body (Markdown: lists, **bold**, etc.).
+Edit `src/content/items/<slug>.md`. The schema lives in `src/content.config.ts` —
+match it exactly. Set `group`/`tags`/`condition`/`status` and write the
+description in the body (Markdown: lists, **bold**, etc.). With the optimized
+pipeline you **omit `photos:`** — images come from the `src/assets` folder.
 
 ```yaml
 ---
@@ -70,15 +79,10 @@ tags: [foil, commander, vermelho]
 status: available
 condition: NM
 date: 2026-06-24          # today; used to sort newest-first
-photos:
-  - /items/ragavan-nimble-pilferer-foil/1.jpg
-  - /items/ragavan-nimble-pilferer-foil/2.jpg
 ---
 
 Foil de MH2, pronto pro seu deck de Commander. Centralização ótima.
 ```
-
-Paths in `photos:` are absolute from `public/` (start with `/items/...`).
 
 ## 5. New group (only if needed)
 If the item's group doesn't exist yet, create `src/content/groups/<slug>.md`:
