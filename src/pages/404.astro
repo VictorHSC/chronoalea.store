@@ -1,0 +1,9 @@
+---
+import Base from '../layouts/Base.astro';
+import { STR } from '../config';
+---
+<Base title="Página não encontrada">
+  <h1>Ops! Página não encontrada</h1>
+  <p class="lead">O item pode ter sido vendido ou o link está errado.</p>
+  <a class="btn btn--ghost" href="/">{STR.backHome.replace('← ', '')} para a home</a>
+</Base>

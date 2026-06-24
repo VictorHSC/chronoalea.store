@@ -1,0 +1,13 @@
+---
+import { STATUS_LABEL } from '../config';
+
+interface Props {
+  status: 'available' | 'reserved' | 'sold';
+  /** static = sem posicionamento absoluto (para a página do item). */
+  variant?: 'overlay' | 'static';
+}
+const { status, variant = 'overlay' } = Astro.props;
+---
+<span class:list={['badge', `badge--${status}`, variant === 'static' && 'item-status']}>
+  {STATUS_LABEL[status]}
+</span>

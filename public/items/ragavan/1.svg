@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
+  <rect width="800" height="1000" fill="#3b0d0d"/>
+  <rect x="40" y="40" width="720" height="920" rx="28" fill="#7f1d1d" stroke="#fca5a5" stroke-width="6"/>
+  <text x="400" y="450" text-anchor="middle" font-family="system-ui, sans-serif" font-size="50" font-weight="700" fill="#fff5f5">Ragavan</text>
+  <text x="400" y="520" text-anchor="middle" font-family="system-ui, sans-serif" font-size="30" fill="#fecaca">foil · foto 1</text>
+</svg>

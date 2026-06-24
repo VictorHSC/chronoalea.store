@@ -1,0 +1,21 @@
+---
+interface Props {
+  photos: string[];
+  alt: string;
+}
+const { photos, alt } = Astro.props;
+---
+{photos.length > 0 && (
+  <div class:list={['gallery', photos.length === 1 && 'single']}>
+    {photos.map((src, i) => (
+      <div class="shot">
+        <img
+          src={src}
+          alt={`${alt}${photos.length > 1 ? ` (${i + 1}/${photos.length})` : ''}`}
+          loading={i === 0 ? 'eager' : 'lazy'}
+          decoding="async"
+        />
+      </div>
+    ))}
+  </div>
+)}

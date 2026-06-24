@@ -1,0 +1,30 @@
+---
+import Base from '../../layouts/Base.astro';
+import ItemCard from '../../components/ItemCard.astro';
+import { STR } from '../../config';
+import { getAllItems, collectTags, itemHasTagSlug, cover } from '../../lib/items';
+
+export async function getStaticPaths() {
+  const items = await getAllItems();
+  const tags = collectTags(items);
+  return tags.map((t) => ({ params: { slug: t.slug }, props: { label: t.tag } }));
+}
+
+const { slug } = Astro.params;
+const { label } = Astro.props;
+const all = await getAllItems();
+const items = all.filter((i) => itemHasTagSlug(i, slug));
+const ogImage = items[0] ? cover(items[0]) : undefined;
+---
+<Base title={`${STR.tag}: ${label}`} description={`Itens com a tag "${label}".`} image={ogImage}>
+  <a class="back" href="/">{STR.backHome}</a>
+  <h1>{STR.tag}: {label}</h1>
+
+  {items.length > 0 ? (
+    <div class="grid">
+      {items.map((item) => <ItemCard item={item} />)}
+    </div>
+  ) : (
+    <p class="empty">{STR.noResults}</p>
+  )}
+</Base>

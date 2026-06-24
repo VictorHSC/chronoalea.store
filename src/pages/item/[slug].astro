@@ -1,0 +1,68 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Gallery from '../../components/Gallery.astro';
+import WhatsAppButton from '../../components/WhatsAppButton.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import { STR } from '../../config';
+import { slugify, tagUrl, groupUrl, cover } from '../../lib/items';
+
+export async function getStaticPaths() {
+  const items = await getCollection('items');
+  return items.map((item) => ({ params: { slug: item.id }, props: { item } }));
+}
+
+const { item } = Astro.props;
+const { Content } = await render(item);
+
+const url = new URL(`/item/${item.id}/`, Astro.site).toString();
+const description = [item.data.title, item.data.condition, ...item.data.tags]
+  .filter(Boolean)
+  .join(' · ');
+
+const groupEntry = item.data.group
+  ? await getEntry('groups', item.data.group)
+  : undefined;
+---
+<Base
+  title={item.data.title}
+  description={description}
+  image={cover(item)}
+  type="article"
+>
+  <a class="back" href="/">{STR.backHome}</a>
+
+  <div class="item-head">
+    <h1>{item.data.title}</h1>
+    <StatusBadge status={item.data.status} variant="static" />
+  </div>
+
+  <Gallery photos={item.data.photos} alt={item.data.title} />
+
+  {(item.data.condition || groupEntry) && (
+    <div class="kv">
+      {item.data.condition && (
+        <span><b>{STR.condition}:</b> {item.data.condition}</span>
+      )}
+      {groupEntry && (
+        <span>
+          <b>{STR.group}:</b> <a href={groupUrl(groupEntry.id)}>{groupEntry.data.title}</a>
+        </span>
+      )}
+    </div>
+  )}
+
+  {item.data.tags.length > 0 && (
+    <div class="chip-row">
+      {item.data.tags.map((t) => (
+        <a class="chip" href={tagUrl(slugify(t))}>{t}</a>
+      ))}
+    </div>
+  )}
+
+  <div class="actions">
+    <WhatsAppButton itemTitle={item.data.title} url={url} />
+  </div>
+
+  <div class="prose"><Content /></div>
+</Base>

@@ -1,0 +1,34 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ItemCard from '../../components/ItemCard.astro';
+import { STR } from '../../config';
+import { getAllItems, cover } from '../../lib/items';
+
+export async function getStaticPaths() {
+  const groups = await getCollection('groups');
+  return groups.map((group) => ({ params: { slug: group.id }, props: { group } }));
+}
+
+const { group } = Astro.props;
+const all = await getAllItems();
+const items = all.filter((i) => i.data.group === group.id);
+const ogImage = group.data.cover ?? (items[0] ? cover(items[0]) : undefined);
+---
+<Base
+  title={group.data.title}
+  description={group.data.description}
+  image={ogImage}
+>
+  <a class="back" href="/">{STR.backHome}</a>
+  <h1>{group.data.title}</h1>
+  {group.data.description && <p class="lead">{group.data.description}</p>}
+
+  {items.length > 0 ? (
+    <div class="grid">
+      {items.map((item) => <ItemCard item={item} />)}
+    </div>
+  ) : (
+    <p class="empty">{STR.noResults}</p>
+  )}
+</Base>

@@ -1,0 +1,31 @@
+---
+import type { Item } from '../lib/items';
+import { itemUrl, cover, slugify } from '../lib/items';
+import StatusBadge from './StatusBadge.astro';
+
+interface Props {
+  item: Item;
+}
+const { item } = Astro.props;
+const photo = cover(item);
+// slugs das tags, para o filtro client-side da home.
+const tagSlugs = item.data.tags.map(slugify).join(' ');
+---
+<a
+  class:list={['card', item.data.status === 'sold' && 'is-sold']}
+  href={itemUrl(item)}
+  data-item
+  data-tags={tagSlugs}
+  data-group={item.data.group ?? ''}
+>
+  <div class="thumb">
+    {item.data.status !== 'available' && <StatusBadge status={item.data.status} />}
+    {photo
+      ? <img src={photo} alt={item.data.title} loading="lazy" decoding="async" />
+      : <span class="placeholder">🃏</span>}
+  </div>
+  <div class="body">
+    <div class="title">{item.data.title}</div>
+    {item.data.condition && <div class="meta">{item.data.condition}</div>}
+  </div>
+</a>

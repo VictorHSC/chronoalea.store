@@ -1,0 +1,110 @@
+---
+import Base from '../layouts/Base.astro';
+import ItemCard from '../components/ItemCard.astro';
+import { SITE, STR } from '../config';
+import {
+  getAllItems,
+  getAllGroups,
+  collectTags,
+  groupUrl,
+} from '../lib/items';
+
+const items = await getAllItems();
+const groups = await getAllGroups();
+const tags = collectTags(items);
+---
+<Base>
+  <h1>Itens à venda</h1>
+  <p class="lead">{SITE.description}</p>
+
+  {groups.length > 0 && (
+    <nav class="chip-row" aria-label={STR.groups}>
+      {groups.map((g) => (
+        <a class="chip" href={groupUrl(g.id)}>{g.data.title}</a>
+      ))}
+    </nav>
+  )}
+
+  {tags.length > 0 && (
+    <section aria-label={STR.filterByTag}>
+      <div class="chip-row">
+        {tags.map((t) => (
+          <button
+            type="button"
+            class="chip"
+            data-tag-chip
+            data-slug={t.slug}
+            aria-pressed="false"
+          >
+            {t.tag}<span class="count">{t.count}</span>
+          </button>
+        ))}
+        <button type="button" class="chip" data-clear hidden>✕ {STR.clearFilter}</button>
+      </div>
+    </section>
+  )}
+
+  <div class="grid">
+    {items.map((item) => <ItemCard item={item} />)}
+  </div>
+
+  <p class="empty" data-empty hidden>{STR.noResults}</p>
+</Base>
+
+<script>
+  const params = new URLSearchParams(location.search);
+  const selected = new Set(
+    (params.get('tags') ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean),
+  );
+
+  const chips = Array.from(
+    document.querySelectorAll<HTMLButtonElement>('[data-tag-chip]'),
+  );
+  const cards = Array.from(
+    document.querySelectorAll<HTMLElement>('[data-item]'),
+  );
+  const emptyEl = document.querySelector<HTMLElement>('[data-empty]');
+  const clearBtn = document.querySelector<HTMLButtonElement>('[data-clear]');
+
+  function apply() {
+    let visible = 0;
+    for (const card of cards) {
+      const cardTags = new Set(
+        (card.dataset.tags || '').split(' ').filter(Boolean),
+      );
+      const show = Array.from(selected).every((t) => cardTags.has(t));
+      card.hidden = !show;
+      if (show) visible++;
+    }
+    for (const chip of chips) {
+      chip.setAttribute(
+        'aria-pressed',
+        selected.has(chip.dataset.slug || '') ? 'true' : 'false',
+      );
+    }
+    if (emptyEl) emptyEl.hidden = visible !== 0;
+    if (clearBtn) clearBtn.hidden = selected.size === 0;
+    const url = selected.size
+      ? `?tags=${Array.from(selected).join(',')}`
+      : location.pathname;
+    history.replaceState(null, '', url);
+  }
+
+  for (const chip of chips) {
+    chip.addEventListener('click', () => {
+      const slug = chip.dataset.slug || '';
+      if (selected.has(slug)) selected.delete(slug);
+      else selected.add(slug);
+      apply();
+    });
+  }
+  clearBtn?.addEventListener('click', () => {
+    selected.clear();
+    apply();
+  });
+
+  apply();
+</script>

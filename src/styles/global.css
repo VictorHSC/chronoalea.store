@@ -1,0 +1,245 @@
+/* ============================================================================
+   Design system — mobile-first, sem framework. Tudo via variáveis CSS.
+   ========================================================================== */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --text: #16181d;
+  --muted: #6b7280;
+  --border: #e3e6ea;
+  --accent: #4f46e5;
+  --accent-contrast: #ffffff;
+  --whatsapp: #25d366;
+  --whatsapp-ink: #0b3d27;
+  --ok: #16a34a;
+  --warn: #d97706;
+  --danger: #dc2626;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 4px 16px rgba(16, 24, 40, 0.06);
+  --maxw: 920px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d0f13;
+    --surface: #161a21;
+    --surface-2: #1d222b;
+    --text: #e8eaed;
+    --muted: #9aa3af;
+    --border: #2a313c;
+    --accent: #818cf8;
+    --accent-contrast: #0d0f13;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.35);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+
+img { display: block; max-width: 100%; }
+
+.container {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+
+/* ---- Header / footer ---------------------------------------------------- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  backdrop-filter: saturate(1.4) blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.site-header .inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+}
+.site-header .brand {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  font-size: 1.05rem;
+}
+.site-footer {
+  margin-top: 48px;
+  padding: 28px 0;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+main { padding-top: 20px; }
+
+h1 { font-size: 1.5rem; letter-spacing: -0.02em; margin: 0 0 4px; }
+h2 { font-size: 1.15rem; letter-spacing: -0.01em; }
+.lead { color: var(--muted); margin: 0 0 18px; }
+.back { display: inline-block; color: var(--muted); text-decoration: none; margin-bottom: 12px; font-size: 0.9rem; }
+.back:hover { color: var(--text); }
+
+/* ---- Chips (tags / grupos) --------------------------------------------- */
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.85rem;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.12s, background 0.12s;
+}
+.chip:hover { border-color: var(--accent); }
+.chip .count { color: var(--muted); font-variant-numeric: tabular-nums; }
+.chip[aria-pressed="true"],
+.chip.is-active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+}
+.chip[aria-pressed="true"] .count { color: inherit; opacity: 0.8; }
+
+/* ---- Grid de itens ------------------------------------------------------ */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+  margin-top: 8px;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  text-decoration: none;
+  box-shadow: var(--shadow);
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+.card:hover { transform: translateY(-2px); border-color: var(--accent); }
+.card .thumb {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  background: var(--surface-2);
+}
+.card .thumb img { width: 100%; height: 100%; object-fit: cover; }
+.card .thumb .placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 2rem;
+}
+.card .body { padding: 10px 12px 12px; }
+.card .title { font-weight: 600; font-size: 0.95rem; line-height: 1.25; }
+.card .meta { margin-top: 4px; color: var(--muted); font-size: 0.78rem; }
+
+/* ---- Badges de status --------------------------------------------------- */
+.badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #fff;
+  backdrop-filter: blur(2px);
+}
+.badge--available { background: color-mix(in srgb, var(--ok) 88%, black 0%); }
+.badge--reserved { background: var(--warn); }
+.badge--sold { background: var(--danger); }
+.card.is-sold .thumb img { filter: grayscale(0.7) brightness(0.9); }
+
+/* ---- Página de item ----------------------------------------------------- */
+.item-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.item-status { position: static; }
+
+.gallery {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 6px;
+  margin: 14px 0;
+}
+.gallery::-webkit-scrollbar { height: 6px; }
+.gallery::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; }
+.gallery .shot {
+  scroll-snap-align: center;
+  flex: 0 0 86%;
+  max-width: 520px;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.gallery .shot img { width: 100%; height: 100%; object-fit: contain; }
+.gallery.single .shot { flex-basis: 100%; }
+
+.prose { font-size: 0.98rem; }
+.prose p { margin: 0 0 12px; }
+.prose ul { padding-left: 1.2em; }
+
+.kv { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--muted); font-size: 0.9rem; margin: 10px 0 4px; }
+.kv b { color: var(--text); font-weight: 600; }
+
+/* ---- Botões ------------------------------------------------------------- */
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 6px; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.btn--wa { background: var(--whatsapp); color: #06291a; flex: 1 1 auto; }
+.btn--wa:hover { filter: brightness(0.96); }
+.btn--ghost { background: var(--surface); border-color: var(--border); color: var(--text); }
+.btn--ghost:hover { border-color: var(--accent); }
+.btn svg { width: 20px; height: 20px; }
+
+/* ---- Estados vazios ----------------------------------------------------- */
+.empty { color: var(--muted); padding: 28px 0; text-align: center; }
+[hidden] { display: none !important; }
+
+@media (min-width: 640px) {
+  h1 { font-size: 1.9rem; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 18px; }
+  .gallery .shot { flex-basis: 60%; }
+}
